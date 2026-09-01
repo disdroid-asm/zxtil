@@ -35,9 +35,6 @@ Interrupt:              DI                                      ; Disable interr
     call Read_Controls
     ld (controls),a
         
-    ;call Read_Keyboard
-    ;ld (key),a    
-
                         POP IY                                  ; Restore all the registers
                         POP HL
                         POP DE
@@ -54,4 +51,4 @@ Interrupt:              DI                                      ; Disable interr
                         RET  
 
 controls:   db 0
-;key:        db 0
+
