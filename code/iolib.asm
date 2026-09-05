@@ -54,7 +54,18 @@ _CRLF:  ld a,0
 CRNL:   ld a,0
         ld (CURSORY),a
         ret
-        
+
+BACKSPACE:
+        push af
+        ld a,(CURSORX)
+        dec a
+        jr nc,BACKSPACE1
+        inc a
+BACKSPACE1:
+        ld (CURSORX),a
+        pop af
+        ret
+
 _KEY:   push bc
         push hl
         push de
@@ -143,4 +154,20 @@ USSKIP: djnz USLOOP
         ret
 
 
+; DE - address
+; BC - size
+SAVEFILE:
+        LD HL, DE          ; HL must point to the start
+        di
+        CALL 1474          ; call ROM SAVE routine (0x05C2)
+        ei
+        ret
 
+; DE - address
+LOADFILE:
+        LD BC, 0           ; BC = 0 normally for default loading
+        LD HL, 0           ; HL unused
+        di
+        CALL 1367          ; call ROM LOAD routine (0x0557)
+        ei
+        ret

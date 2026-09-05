@@ -110,7 +110,7 @@ Keyboard_Map_CAP:
 			DB 0x7F," ",0,"M","N","B"
 
 Keyboard_Map_SYM:		
-			DB 0xFE,0,":","£","?","/"
+			DB 0xFE,0,":",0x60,"?","/"
 			DB 0xFD,"~",0x7c,0x5c,"{","}"
 			DB 0xFB,0xc7,0xc9,0xc8,"<",">"
 			DB 0xF7,"!","@","#","$","%"
@@ -118,12 +118,6 @@ Keyboard_Map_SYM:
 			DB 0xDF,'"',";","#","]","["
 			DB 0xBF,13,"=","+","-","^"
 			DB 0x7F," ",0,".",",","*"
-
-;Input_Custom:		DB 0xFB, %00000001		; Q (Up)
-;			DB 0xFD, %00000001		; A (Down)
-;			DB 0xDF, %00000010		; O (Left)
-;			DB 0xDF, %00000001		; P (Right)
-;			DB 0x7F, %00000001		; Space (Fire)
 
 NUMCONTROLS = 2
 Input_Custom:

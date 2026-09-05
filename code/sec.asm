@@ -339,7 +339,7 @@ CREATE: dw COLON
         dw ASPACE
         dw TOKEN
         dw HERE
-        dw CURRENT
+        dw _CURRENT
         dw FETCH
         dw STORE
         dw CHASH

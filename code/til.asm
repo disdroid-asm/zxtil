@@ -111,6 +111,7 @@ INKEY:  call _KEY
         jp ISTART
 TSTBS:  cp BACKSP
         jr nz,TSTCR
+        call BACKSPACE
         dec l
         jp m,IZERO
         ld (hl),0x20
@@ -1664,7 +1665,7 @@ RETURN equ 0xD000
 DICT equ 0xE000
 
 LBLEN equ 128
-LINEDEL equ 0x0e
+LINEDEL equ 0x07
 BACKSP equ 0x0c
 CR equ 0x0d
 
