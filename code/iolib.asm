@@ -1,11 +1,14 @@
 CURSORX db 0
 CURSORY db 0
+CURSORCHR db '>'
 
+; Print the character in a at the cursor position then advance the cursor.
 _ECHO:  
         push ix
         push hl
         push de
         push bc
+        push af
 
         push af
         ld a,(CURSORY)
@@ -16,6 +19,7 @@ _ECHO:
         ld l,a
         pop af
         
+        and %01111111
         call PrintChar
 
         ld a,(CURSORX)
@@ -24,6 +28,7 @@ _ECHO:
         jr z,ECHONL
         ld (CURSORX),a        
 ECHODONE:
+        pop af
         pop bc
         pop de
         pop hl
@@ -43,6 +48,7 @@ ECHOCLR:
         ld (CURSORX),a
         jr ECHODONE
 
+; Newline
 _CRLF:  ld a,0
         ld (CURSORX),a
         ld a,(CURSORY)
@@ -55,26 +61,80 @@ CRNL:   ld a,0
         ld (CURSORY),a
         ret
 
+; Move the cursor back one space, stopping at the beginning of the line.
 BACKSPACE:
         push af
+        call _CURSORBL
         ld a,(CURSORX)
         dec a
-        jr nc,BACKSPACE1
+        cp 32
+        jr c,BACKSPACE1
         inc a
 BACKSPACE1:
         ld (CURSORX),a
+        ;call _CURSOR
         pop af
         ret
 
-_KEY:   push bc
+; Display the cursor.
+_CURSOR:
+        push ix
         push hl
         push de
-
-        call Read_Keyboard_Debounce
-
+        push bc
+        ld a,(CURSORY)
+        .3 sla a
+        ld h,a
+        ld a,(CURSORX)
+        .3 sla a
+        ld l,a
+        ld a,(CURSORCHR)
+        call PrintChar
+        pop bc
         pop de
         pop hl
+        pop ix
+        ret
+        ret
+
+; Blank the cursor
+_CURSORBL:
+        push ix
+        push hl
+        push de
+        push bc
+        ld a,(CURSORY)
+        .3 sla a
+        ld h,a
+        ld a,(CURSORX)
+        .3 sla a
+        ld l,a
+        ld a,32
+        call PrintChar
         pop bc
+        pop de
+        pop hl
+        pop ix
+        ret
+        ret
+
+; Read one key, return in a
+_KEY:   exx
+        call Read_Keyboard_Debounce
+        push af
+        exx
+        pop af
+        ret
+
+; Clear the screen
+_CLEARSCRN:
+        exx
+        ld hl,0x4000
+        call Clear_Screen_Fast
+        ld a,0
+        ld (CURSORX),a
+        ld (CURSORY),a
+        exx
         ret
 
 

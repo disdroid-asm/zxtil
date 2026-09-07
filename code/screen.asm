@@ -37,6 +37,24 @@ PrintChar_:
     ret
 
 
+; Fast clear-screen routine
+; Uses the stack to block clear memory
+; HL: Address of screen buffer
+;
+Clear_Screen_Fast:      LD (Clear_Screen_Fast_End+1),SP ; Store the stack (self modding code)
+                        LD DE,0x1800
+                        ADD HL,DE                       ; Move to end of buffer
+                        LD SP,HL                        ; Set stack to pointer
+                        LD DE,0                         ; We are clearing, so set DE to 0
+                        ;ld de,$0101
+                        LD B,128                        ; We loop 128 times - 24 words * 128 = 6144
+bytes
+1:                      DUP 24
+                        PUSH DE
+                        EDUP
+                        DJNZ 1B
+Clear_Screen_Fast_End:  LD SP,0x0000                    ; Restore the stack
+                        RET
 
 
 ; Source: https://zxonline.net/zx-spectrum-graphics-magic-the-basics-every-spectrum-fan-should-know/

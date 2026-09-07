@@ -1,3 +1,4 @@
+; Runtime register use:
 ; BC - instruction register
 ; DE - word address register and scratch
 ; HL - scratch
@@ -5,6 +6,24 @@
 ; IY - address of NEXT
 ; SP - data stack pointer
 
+; Dictionary word header
+; word - previous word or null
+; byte - length of token
+; 3 bytes - first 3 characters
+; word - code address
+; ... - body
+; 
+; The code address of a primitive is the body: dw $+2
+; The primitive is terminated by a jump to the NEXT routine, stored in the iy register.
+; Primitves that are not linked in the dictionary but used by the interpreter are
+; defined by just the code address followed by the code body.
+; Secondaries have the function COLON as the code body and are terminated by the 
+; prmitive SEMI .
+;
+; Immediate words are linked in a separate vocabulary pointed to by the COMPILER variable.
+; All other predefined words are linked in the CORE vocabulary.
+
+; Entry point, start or restart.
 START:  ld de,RSTMSG
         ld a,(BASE)
         and a
@@ -23,6 +42,7 @@ ABORT:  ld sp,STACK
         ld bc,OUTER
         jp NEXT
 
+; Check for stack underflow
 _STACK: dw $+2
         ld hl,STACK
         and a
@@ -34,6 +54,7 @@ _STACK: dw $+2
         jp PATCH
 STKOK:  jp (iy)
 
+; Restart the interpreter after error
 PATCH:  ld a,(MODE)
         and a
         jp z,ABORT
@@ -58,6 +79,7 @@ SKIP:   ld a,(hl)
         pop de
         jp ABORT
 
+; The inner loop.
 SEMI:   dw $+2
         ld c,(ix+0)
         inc ix
@@ -76,8 +98,8 @@ RUN:    ld e,(hl)
         ex de,hl
         jp (hl)
 
-COLON:  ;dw $+2
-        dec ix
+; Function for the code address of secondaries
+COLON:  dec ix
         ld (ix+0),b
         dec ix
         ld (ix+0),c
@@ -85,6 +107,8 @@ COLON:  ;dw $+2
         ld b,d
         jp (iy)
 
+; EXECUTE - pop the code address from the stack and execute
+; ( addr - )
 LINK = $
         db 7,'E','X','E' ; EXECUTE
         dw 0
@@ -92,8 +116,8 @@ EXECUTE: dw $+2
         pop hl
         jr RUN
         
-
-
+; Input a line from the terminal to the input buffer.
+; ( -- )
 INLINE: dw $+2
         push bc
 ISTART: call _CRLF
@@ -104,11 +128,13 @@ ICLEAR: ld (hl),0x20
         inc hl
         djnz ICLEAR
 IZERO:  ld l,0
-INKEY:  call _KEY
+INKEY:  call _CURSOR
+        call _KEY
         cp LINEDEL
-        jr nz,TSTBS
-        call _ECHO
-        jp ISTART
+        ;jr nz,TSTBS
+        ;call _ECHO
+        ;jp ISTART
+        jr z,ISTART
 TSTBS:  cp BACKSP
         jr nz,TSTCR
         call BACKSPACE
@@ -143,6 +169,8 @@ LAST1:  ld a,0x20
         pop bc
         jp (iy)
 
+; TOKEN - copy a single token from the input buffer to the next free dictionary location.
+; ( delim -- )
         db 5,'T','O','K' ; TOKEN
         dw LINK
 LINK = $-6
@@ -179,6 +207,8 @@ ENDTOK: inc l
         exx
         jp (iy)
 
+; SEARCH - search the dictionary for the token at the address passed on the stack
+; ( token -- false addr OR true)
         db 6,'S','E','A' ; SEARCH
         dw LINK
 LINK = $-6
@@ -221,6 +251,8 @@ SFLAG:  push bc
         exx
         jp (iy)
 
+; Parse a number from the token at the dictionary top
+; ( -- true value OR false )
 NUMBER: dw $+2
         exx
         ld hl,(DP)
@@ -286,6 +318,7 @@ NDONE:  push de
         exx
         jp (iy)
 
+; End of input processing. Show OK, or show error and patch the interpreter.
 QUESTION: dw $+2
         ld hl,(DP)
         inc hl
@@ -302,6 +335,8 @@ QRETURN:
         ld de,QMSG
         jp PATCH
 
+; Display a string
+; ( string -- )
 TYPE:   dw $+2
         pop hl
 _TYPE:  ld e,(hl)
@@ -312,6 +347,8 @@ TLOOP:  inc hl
         jr nz,TLOOP
         jp (iy)
 
+; ! - store the word at NOS to the address at TOS
+; ( addr data -- )
         db 1,'!',0,0 ; !
         dw LINK
 LINK = $-6
@@ -323,6 +360,8 @@ STORE:  dw $+2
         ld (hl),d
         jp (iy)
 
+; #> - drop the sign byte left on the return stack by <# and then display the string on the data stack
+; ( string -- ) R( sign -- )
         db 2,'#','>',0 ; #>
         dw LINK
 LINK = $-6
@@ -330,6 +369,7 @@ HASHGT: dw $+2
         inc ix
         jp _DISPLAY
 
+; 
 STARHASH:
         dw $+2
         ld a,(bc)
@@ -350,6 +390,18 @@ _PLUSLOOP:
         ld a,e
         jp _LOOP_
 
+        db 1,'*',0,0 ; *
+        dw LINK
+LINK = $-6
+_MUL:   exx
+        pop bc
+        pop de
+        call ISIGN
+        call _UD
+        call OSIGN
+        push hl
+        exx
+        jp (iy)
 
         db 2,'*','/',0 ; */
         dw LINK
@@ -941,7 +993,7 @@ LINK = $-6
 ASCII:  dw $+2
         pop hl
         ld a,0x30
-        and l
+        add l
         cp 0x3a
         jr c,ASCOUT
         add 7
@@ -1096,7 +1148,7 @@ CKNEXT: push hl
         dw LINK
 LINK = $-6
 _CLEAR: dw $+2
-    ; TODO cls
+        call _CLEARSCRN
         jp (iy)
 
     ; TODO sys

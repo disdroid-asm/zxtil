@@ -1,3 +1,5 @@
+; # - convert the top stack entry to the current base, returns quotient value and remainder in ascii 
+; ( val -- quot char )
         db 1,'#',0,0
         dw LINK
 LINK = $-6
@@ -5,7 +7,7 @@ HASH:   dw COLON
         dw _ZERO
         dw _BASE
         dw CFETCH
-        dw DIVMOD
+        dw DDIVM
         dw ASCII
         dw _SWAP
         dw SEMI
