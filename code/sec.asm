@@ -1,3 +1,5 @@
+; Secondary word definitions
+
 ; # - convert the top stack entry to the current base, returns quotient value and remainder in ascii 
 ; ( val -- quot char )
         db 1,'#',0,0
@@ -649,28 +651,7 @@ LSQBRK: dw COLON
         dw ONEPLUS
         dw _DP
         dw PLUSSTORE
-        dw SEMI
-
-
-OUTER:  ;dw COLON
-OUTERLP:
-        dw TYPE
-        dw INLINE
-        dw ASPACE
-        dw TOKEN
-        dw QSEARCH
-        dw _IF
-        db 0x0b
-        dw QNUMBER
-        dw _END
-        db 0xf3
-        dw QUESTION
-        dw _WHILE
-        db 0xea
-        dw EXECUTE        
-        dw _WHILE
-        db 0xe9
-        
+        dw SEMI        
 
 IMMTOP = IMLINK
 CORETOP = LINK

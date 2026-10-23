@@ -1,3 +1,5 @@
+; Interrupt (IM 2) routines
+
 Initialise_Interrupt:   DI                                      ; Disable interrupts
                         LD HL,Interrupt
                         LD IX,0xFFF0                            ; This code is to be written at 0xFF

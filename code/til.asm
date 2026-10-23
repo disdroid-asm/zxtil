@@ -1,3 +1,5 @@
+; Primary word definitions
+
 ; Runtime register use:
 ; BC - instruction register
 ; DE - word address register and scratch
@@ -397,7 +399,7 @@ _MUL:   exx
         pop bc
         pop de
         call ISIGN
-        call _UD
+        call UDSTAR
         call OSIGN
         push hl
         exx
@@ -425,7 +427,7 @@ _STARSLASHMOD:
         pop bc
         pop de
         call ISIGN
-        call _UD
+        call UDSTAR
         exx 
         ex af,af'
         xor l
@@ -437,7 +439,7 @@ _STARSLASHMOD:
         neg
 SKIPN:  ld d,c
         ld e,a
-        call _UD
+        call UDSTAR
         call OSIGN
         push hl
         push bc
@@ -558,7 +560,7 @@ LPAGE:  ld d,(hl)
         inc bc
         jp (iy)
 
-_SYS:   dw $+2
+_SYS:   ;dw $+2
         ld a,(de)
         ld hl,SYSBLOCK
         add l
@@ -868,11 +870,13 @@ LTPUSH: push de
 LINK = $-6
 LTHASH: dw $+2 
         pop hl
-        ld e,0xa0
+        ;ld e,0xa0
+        ld de,0xa0
         push de
         push hl
         dec ix
-        ld (ix+0),h
+        ;ld (ix+0),h
+        ld (ix+0),l
         jp (iy)
 
         db 2,'<','R',0 ; <R
@@ -881,9 +885,9 @@ LINK = $-6
 LTR:    dw $+2 
         pop hl
         dec ix
-        ld (ix+0),hl
+        ld (ix+0),h
         dec ix
-        ld (ix+0),hl
+        ld (ix+0),l
         jp (iy)
 
         db 1,'=',0,0 ; =
@@ -1009,14 +1013,11 @@ ASPACE: dw $+2
         push hl
         jp (iy)
 
-; TODO sys
         db 4,'B','A','S' ; BASE
         dw LINK
 LINK = $-6
-_BASE:  dw $+2
-        ld hl,BASE
-        push hl
-        jp (iy)
+_BASE:  dw _SYS
+        db BASE_
 
         db 6,'B','I','N' ; BINARY
         dw LINK
@@ -1151,25 +1152,19 @@ _CLEAR: dw $+2
         call _CLEARSCRN
         jp (iy)
 
-    ; TODO sys
         db 5,'C','O','M' ; COMPILER
         dw LINK
 LINK = $-6
 _COMPILER:   
-        dw $+2
-        ld hl,COMPILER
-        push hl
-        jp (iy)
+        dw _SYS
+        db COMPILER_
 
-; TODO sys
         db 7,'C','O','N' ; CONTEXT
         dw LINK
 LINK = $-6
 _CONTEXT: 
-        dw $+2
-        ld hl,CONTEXT
-        push hl
-        jp (iy)
+        dw _SYS
+        db CONTEXT_
 
         db 4,'C','O','R' ; CORE
         dw LINK
@@ -1217,15 +1212,12 @@ CSPOUT: push de
         push hl
         jp (iy)
 
-; TODO sys
         db 7,'C','U','R' ; CURRENT
         dw LINK
 LINK = $-6
 _CURRENT: 
-        dw $+2
-        ld hl,CURRENT
-        push hl
-        jp (iy)
+        dw _SYS
+        db CURRENT_
 
         db 2,'D','*',0 ; D*
         dw LINK
@@ -1235,7 +1227,7 @@ DMUL:   dw $+2
         pop bc
         pop de
         call ISIGN
-        call _UD
+        call UDSTAR
         ex af,af'
         jp p,DMOUT
         ld a,c
@@ -1251,24 +1243,42 @@ DMOUT:  push hl
         exx
         jp (iy)
 
+; Signed divide 24bit by 8bit
+; ( divisor 8bit 16bit -- remainder quotient )
         db 5,'D','/','M' ; D/MOD
         dw LINK
 LINK = $-6
 DDIVM:  dw $+2
         exx
-        pop hl
         pop de
+        pop hl
+
         pop bc
         ld a,h
         xor d
         ex af,af'
+
         ld a,l
-        and a
-        jp p,DDMOV1
-        neg
-DDMOV1: ld d,a
+        and a             ; test sign, clears carry
+        jp p,POSITIVE     ; non-negative: skip negation
+
+        ; Negative dividend: negate full 24-bit {A=L, BC}
+        ld d,a            ; save high byte in D
+        ld hl,0
+        sbc hl,bc         ; HL = -BC (carry already 0); CF = (BC != 0)
+        ld a,d            ; restore high byte
+        jr nc,NEG_FULL    ; BC was 0: full negate high byte
+        cpl               ; BC != 0: complement only (borrow already applied)
+        jr DDMOV1
+
+NEG_FULL:
+        neg               ; BC == 0: -A
+
+POSITIVE:
         ld h,b
-        ld l,c
+        ld l,c            ; positive path: HL = BC unchanged
+
+DDMOV1: ld d,a            ; D = abs(high byte)
         ld a,e
         and a
         jp p,DDMOV2
@@ -1277,8 +1287,8 @@ DDMOV1: ld d,a
         sbc hl,bc
         jp nz,DDMOV2
         inc a
-DDMOV2: ld d,a
-        call _UD
+DDMOV2: ld e,a
+        call UDSLASH
         call OSIGN
         push hl
         push bc        
@@ -1318,14 +1328,11 @@ DISPLP: pop hl
         exx
         jp (iy)
 
-; TODO sys
         db 2,'D','P',0 ; DP
         dw LINK
 LINK = $-6
-_DP:    dw $+2
-        ld hl,DP
-        push hl
-        jp (iy)
+_DP:    dw _SYS
+        db DP_
 
         db 4,'D','R','O' ; DROP
         dw LINK
@@ -1419,14 +1426,11 @@ KEY:    dw $+2
         push hl
         jp (iy)
 
-; TODO sys
         db 3,'L','B','P' ; LBP
         dw LINK
 LINK = $-6
-_LBP:   dw $+2
-        ld hl,LBP
-        push hl
-        jp (iy)
+_LBP:   dw _SYS
+        db LBP_
 
         db 4,'L','R','O' ; LROT
         dw LINK
@@ -1491,14 +1495,11 @@ _MOD:   dw $+2
         exx
         jp (iy)
 
-    ; TODO sys
         db 4,'M','O','D' ; MODE
         dw LINK
 LINK = $-6
-_MODE:  dw $+2
-        ld hl,MODE
-        push hl
-        jp (iy)
+_MODE:  dw _SYS
+        db MODE_
 
         db 5,'M','O','D' ; MODU/
         dw LINK
@@ -1671,14 +1672,11 @@ _SPACE: dw $+2
         call _ECHO
         jp (iy)
 
-    ; TODO sys
         db 5,'S','T','A' ; STATE
         dw LINK
 LINK = $-6
-_STATE: dw $+2
-        ld hl,STATE
-        push hl
-        jp (iy)
+_STATE: dw _SYS
+        db STATE_
 
         db 4,'S','W','A' ; SWAP
         dw LINK
@@ -1729,17 +1727,24 @@ OKMSG   db 2,'OK'
 STKMSG  db 5,'STACK'
 
         align 256
-;SYSBLOCK .256 db 0
 SYSBLOCK:
 MODE    dw 0
+STATE   db 0
+BASE    db 0
 DP      dw DICT
 CONTEXT dw _CORE
 CURRENT dw _CORE
 LBP     dw 0
 COMPILER dw IMMTOP
-BASE    db 0
-STATE   db 0
 
+MODE_   equ MODE - SYSBLOCK
+STATE_  equ STATE - SYSBLOCK
+BASE_   equ BASE - SYSBLOCK
+DP_     equ DP - SYSBLOCK
+CONTEXT_ equ CONTEXT - SYSBLOCK
+CURRENT_ equ CURRENT - SYSBLOCK
+LBP_    equ LBP - SYSBLOCK
+COMPILER_ equ COMPILER - SYSBLOCK
 
         align 256
 LBUFFER .128 db 0

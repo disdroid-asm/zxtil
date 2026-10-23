@@ -1,3 +1,5 @@
+; IO routines and arithmetic
+
 CURSORX db 0
 CURSORY db 0
 CURSORCHR db '>'
@@ -160,10 +162,11 @@ OSIGN:  ex af,af'
         ret p
         ex de,hl
         ld hl,0
+        and a
         sbc hl,de
         ret
 
-_UD:    ld a,l
+UDSTAR: ld a,l
         ld bc,0x800
         ld h,c
         ld l,c
@@ -186,16 +189,25 @@ SLOOP:  add hl,hl
 SKPAD:  djnz SLOOP
         ret
 
+; On entrance, D,HL contains a 24-bit positive dividend and 
+; E contains an 8-bit positive divisor. On exit, C contains an 
+; 8-bit remainder and HL contains a 16-bit quotient. No test 
+; is made to verify a correct 16-bit quotient. 
 UDSLASH:
         ld b,0x10
 DSLOOP: add hl,hl
         ld a,d
         adc d
         ld d,a
+        jr c,OVFL      ; overflow: shifted D >= 256, always >= E
         sub e
-        jp m,UDSKIP
-        inc l
+        jr c,UDSKIP    ; borrow: can't subtract
         ld d,a
+        inc l
+        jr UDSKIP
+OVFL:   sub e          ; no borrow possible
+        ld d,a
+        inc l
 UDSKIP: djnz DSLOOP
         ld c,d
         ret
