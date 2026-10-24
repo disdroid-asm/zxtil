@@ -41,7 +41,7 @@ ABORT:  ld sp,STACK
         ld ix,RETURN
         ld hl,#8080
         ld (LBEND),hl
-        ld bc,OUTER
+        ld bc,(OUTER)
         jp NEXT
 
 ; Check for stack underflow
@@ -339,6 +339,9 @@ QRETURN:
 
 ; Display a string
 ; ( string -- )
+        db 4,'T','Y','P' ; TYPE
+        dw LINK
+LINK = $-6
 TYPE:   dw $+2
         pop hl
 _TYPE:  ld e,(hl)
@@ -395,7 +398,8 @@ _PLUSLOOP:
         db 1,'*',0,0 ; *
         dw LINK
 LINK = $-6
-_MUL:   exx
+_MUL:   dw $+2
+        exx
         pop bc
         pop de
         call ISIGN
@@ -1720,8 +1724,8 @@ BACKSP equ 0x0c
 CR equ 0x0d
 
 
-RSTMSG  db 3,'RST'
-SRTMSG  db 3,'SRT'
+RSTMSG  db 13,'ZXTIL Restart'
+SRTMSG  db 14,'ZXTIL Starting'
 QMSG    db 1,'?'
 OKMSG   db 2,'OK'
 STKMSG  db 5,'STACK'
@@ -1736,6 +1740,7 @@ CONTEXT dw _CORE
 CURRENT dw _CORE
 LBP     dw 0
 COMPILER dw IMMTOP
+OUTER   dw OUTER_INTERACTIVE
 
 MODE_   equ MODE - SYSBLOCK
 STATE_  equ STATE - SYSBLOCK

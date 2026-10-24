@@ -1,7 +1,9 @@
 
 ; The outer loop for the interactive interpreter
 
-OUTER:  dw TYPE
+;OUTER:  
+OUTER_INTERACTIVE:
+        dw TYPE
         dw INLINE
         dw ASPACE
         dw TOKEN

@@ -147,7 +147,10 @@ ISIGN:  ld a,d
         and a
         jp p,TST2
         ld hl,0
-        sbc hl,de
+        
+        ;sbc hl,de
+        sbc hl,bc
+
         ex de,hl
 TST2:   ld h,b
         ld l,c
@@ -168,6 +171,7 @@ OSIGN:  ex af,af'
 
 UDSTAR: ld a,l
         ld bc,0x800
+        ;ld bc,0x1000
         ld h,c
         ld l,c
 DLOOP:  add hl,hl
