@@ -16,6 +16,7 @@ OUTER_INTERACTIVE:
         dw QUESTION
         dw _WHILE
         db 0xea
-        dw EXECUTE        
+        ;dw EXECUTE        
+        dw QEXECUTE
         dw _WHILE
         db 0xe9

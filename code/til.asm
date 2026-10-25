@@ -209,8 +209,9 @@ ENDTOK: inc l
         exx
         jp (iy)
 
-; SEARCH - search the dictionary for the token at the address passed on the stack
-; ( token -- false addr OR true)
+; SEARCH - search the dictionary from the address passed on stack for the token at the address 
+; at DP
+; ( entry -- false addr OR true)
         db 6,'S','E','A' ; SEARCH
         dw LINK
 LINK = $-6
@@ -487,7 +488,6 @@ _CLEAVE: dw $+2
         jp (iy)
 
 _CLOOP: dw $+2
-;_CLOOP: 
         push ix
         pop hl
         inc (hl)
@@ -692,9 +692,9 @@ DIVMOD: dw $+2
         exx
         jp (iy)
 
-        db 1,'0',0,0 ; 0
-        dw LINK
-LINK = $-6
+;        db 1,'0',0,0 ; 0
+;        dw LINK
+;LINK = $-6
 _ZERO:  dw $+2 
         ld hl,0
         push hl
@@ -737,9 +737,9 @@ ZEROSET:
         ld (hl),a
         jp (iy)
 
-        db 1,'1',0,0 ; 1
-        dw LINK
-LINK = $-6
+;        db 1,'1',0,0 ; 1
+;        dw LINK
+;LINK = $-6
 _ONE:   dw $+2 
         ld hl,1
         push hl
@@ -1714,9 +1714,6 @@ _XOR:   dw $+2
         jp (iy)
 
 
-STACK equ 0xC000
-RETURN equ 0xD000
-DICT equ 0xE000
 
 LBLEN equ 128
 LINEDEL equ 0x07
@@ -1731,28 +1728,9 @@ OKMSG   db 2,'OK'
 STKMSG  db 5,'STACK'
 
         align 256
-SYSBLOCK:
-MODE    dw 0
-STATE   db 0
-BASE    db 0
-DP      dw DICT
-CONTEXT dw _CORE
-CURRENT dw _CORE
-LBP     dw 0
-COMPILER dw IMMTOP
-OUTER   dw OUTER_INTERACTIVE
-
-MODE_   equ MODE - SYSBLOCK
-STATE_  equ STATE - SYSBLOCK
-BASE_   equ BASE - SYSBLOCK
-DP_     equ DP - SYSBLOCK
-CONTEXT_ equ CONTEXT - SYSBLOCK
-CURRENT_ equ CURRENT - SYSBLOCK
-LBP_    equ LBP - SYSBLOCK
-COMPILER_ equ COMPILER - SYSBLOCK
-
-        align 256
 LBUFFER .128 db 0
 LBEND equ $-2
-        db 0
+
+PAD     .128 db 0
+;        db 0
 

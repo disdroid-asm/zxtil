@@ -27,7 +27,7 @@ HASHS:  dw COLON
         dw SEMI
 
 IMLINK = $
-        db 5,'+','L','O'
+        db 5,'+','L','O' ; +LOOP
         dw 0
 PLUSLOOP:
         dw COLON
@@ -110,7 +110,7 @@ _SEMI:  dw COLON
         dw C0SET
         dw SEMI
 
-        db 5,';','C','O'
+        db 5,';','C','O' ; ;CODE
         dw IMLINK
 IMLINK = $-6
 SEMICODE:  
@@ -121,7 +121,7 @@ SEMICODE:
         dw C0SET
         dw SEMI
 
-        db 7,'<','B','U'
+        db 7,'<','B','U' ; <BUILDS
         dw LINK
 LINK = $-6
 LTBUILDS: 
@@ -138,9 +138,27 @@ QUESTM: dw COLON
         dw PERIOD
         dw SEMI
 
-        db 7,'?','S','E' ; ?SEARCH
-        dw LINK
-LINK = $-6
+QEXECUTE:
+        dw COLON
+        dw _STATE
+        dw CFETCH
+        dw _STATE
+        dw C0SET
+        dw _MODE
+        dw CFETCH
+        dw EQUALS
+        dw _IF
+        db 0x08
+        dw EXECUTE
+        dw _STACK
+        dw _ELSE
+        db 0x03
+        dw COMMA
+        dw SEMI
+
+;        db 7,'?','S','E' ; ?SEARCH
+;        dw LINK
+;LINK = $-6
 QSEARCH: 
         dw COLON
         dw _CONTEXT
@@ -169,9 +187,9 @@ QSEARCH:
         dw CSTORE
         dw SEMI
 
-        db 7,'?','N','U' ; ?NUMBER
-        dw LINK
-LINK = $-6
+;        db 7,'?','N','U' ; ?NUMBER
+;        dw LINK
+;LINK = $-6
 QNUMBER: 
         dw COLON
         dw NUMBER
@@ -199,7 +217,7 @@ QNUMBER:
         dw SEMI
 
 
-        db 5,'A','D','U'
+        db 5,'A','D','U' ; ADUMP
         dw LINK
 LINK = $-6
 ADUMP:  dw COLON
@@ -218,7 +236,7 @@ ADUMP:  dw COLON
         dw DROP
         dw SEMI
 
-        db 5,'A','P','A'
+        db 5,'A','P','A' ; APART
         dw LINK
 LINK = $-6
 APART:  dw COLON
@@ -238,14 +256,14 @@ APART:  dw COLON
         dw CLOOP
         dw SEMI
 
-        db 5,'B','E','G'
+        db 5,'B','E','G' ; BEGIN
         dw IMLINK
 IMLINK = $-6
 _BEGIN: dw COLON
         dw HERE
         dw SEMI
 
-        db 6,'C','+','L'
+        db 6,'C','+','L' ; C+LOOP
         dw IMLINK
 IMLINK = $-6
 CPLUSLOOP: 
@@ -274,7 +292,7 @@ CASTORE:
         dw STORE
         dw SEMI        
 
-        db 9,'C','C','O'
+        db 9,'C','C','O' ; CCONSTANT
         dw LINK
 LINK = $-6
 CCONSTANT: 
@@ -299,7 +317,7 @@ CDO:    dw COLON
         dw DOCOMMA
         dw SEMI
 
-        db 6,'C','L','E'
+        db 6,'C','L','E' ; CLEAVE
         dw IMLINK
 IMLINK = $-6
 CLEAVE: dw COLON
@@ -307,7 +325,7 @@ CLEAVE: dw COLON
         dw COMMA
         dw SEMI
 
-        db 5,'C','L','O'
+        db 5,'C','L','O' ; CLOOP
         dw IMLINK
 IMLINK = $-6
 CLOOP:  dw COLON
@@ -320,7 +338,7 @@ SCODE:  dw COLON
         dw CASTORE
         dw SEMI
 
-        db 8,'C','O','N'
+        db 8,'C','O','N' ; CONSTANT
         dw LINK
 LINK = $-6
 CONSTANT: 
@@ -335,7 +353,7 @@ CONSTANT:
         push de
         jp (iy)
 
-        db 6,'C','R','E'
+        db 6,'C','R','E' ; CREATE
         dw LINK
 LINK = $-6
 CREATE: dw COLON
@@ -356,7 +374,7 @@ CREATE: dw COLON
         dw COMMA
         dw SEMI
         
-        db 9,'C','V','A'
+        db 9,'C','V','A' ; CVARIABLE
         dw LINK
 LINK = $-6
 CVARIABLE: 
@@ -366,7 +384,7 @@ CVARIABLE:
         push de
         jp (iy)
 
-        db 2,'D','O',0
+        db 2,'D','O',0 ; DO
         dw IMLINK
 IMLINK = $-6
 DO:     dw COLON
@@ -374,7 +392,7 @@ DO:     dw COLON
         dw DOCOMMA
         dw SEMI
 
-        db 3,'D','O',','
+        db 3,'D','O',',' ; DO,
         dw LINK
 LINK = $-6
 DOCOMMA:
@@ -652,6 +670,3 @@ LSQBRK: dw COLON
         dw _DP
         dw PLUSSTORE
         dw SEMI        
-
-IMMTOP = IMLINK
-CORETOP = LINK
