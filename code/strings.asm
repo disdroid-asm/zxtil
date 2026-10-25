@@ -11,6 +11,7 @@ DOTQUOTE:
         dw _IF
         db DQCOMP-$
 ; immediate mode
+; ...
         dw SEMI
 
 ; compile mode

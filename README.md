@@ -9,14 +9,16 @@ Assemble using sjasmplus to generate a TAP file:
 ## Status
 
 The outer interpreter loop is running. Input is read from the keyboard by line, tokenised and executed.
-Because of a bug in the keyboard routine, symbol shift isn't working so it hasn't been possible to test
-the defining words such as `CREATE` and `:` yet. 
 
 _TODO_ Update the outer loop to enable processing of text from RAM instead of the terminal, and to support 
 loading from mass storage. 
 
 
 ## Notes
+
+Symbols are stored using the length and the first three characters. Therefore it's not possible to 
+have two words with the same length and matching first three characters. Only the most recently defined
+will be recognised.
 
 The code in the book is largely complete but contains several bugs and typos. I'm steadily fixing these.
 
