@@ -222,7 +222,7 @@ QNUMBER:
 LINK = $-6
 ADUMP:  dw COLON
         dw OVER
-        dw DO
+        dw _DO
         dw CRET
         dw _DUP
         dw CHASH
@@ -232,7 +232,8 @@ ADUMP:  dw COLON
         dw WAIT
         dw CHASH
         db 0x10
-        dw PLUSLOOP
+        dw _PLUSLOOP
+        db 0xee
         dw DROP
         dw SEMI
 
@@ -244,7 +245,7 @@ APART:  dw COLON
         dw CHASH
         db 8
         dw _ZERO
-        dw CDO
+        dw _CDO
         dw _DUP
         dw CFETCH
         dw CHASH
@@ -253,7 +254,8 @@ APART:  dw COLON
         dw _ECHO
         dw _SPACE
         dw ONEPLUS
-        dw CLOOP
+        dw _CLOOP
+        db 0xef
         dw SEMI
 
         db 5,'B','E','G' ; BEGIN
@@ -280,7 +282,7 @@ CQUEST: dw COLON
         dw PERIOD
         dw SEMI
 
-        db 2,'C','A','!'
+        db 3,'C','A','!'
         dw LINK
 LINK = $-6
 CASTORE: 
@@ -299,7 +301,7 @@ CCONSTANT:
         dw COLON
         dw CREATE
         dw CCOMMA
-        dw SEMICODE
+        dw SCODE
         ld a,(de)
         ld l,a
         ld h,0
@@ -345,7 +347,7 @@ CONSTANT:
         dw COLON
         dw CREATE
         dw COMMA
-        dw SEMICODE
+        dw SCODE
         ex de,hl
         ld e,(hl)
         inc hl
@@ -380,7 +382,7 @@ LINK = $-6
 CVARIABLE: 
         dw COLON
         dw CCONSTANT
-        dw SEMICODE
+        dw SCODE
         push de
         jp (iy)
 
@@ -411,7 +413,7 @@ DOES:   dw COLON
         db 8
         dw PLUS
         dw STORE
-        dw SEMICODE
+        dw SCODE
         dec ix
         ld (ix+0),b
         dec ix
@@ -441,6 +443,7 @@ DUMP:   dw COLON
         dw CHASH
         db 10
         dw _PLUSLOOP
+        db 0xec
         dw DROP
         dw SEMI
 
@@ -495,6 +498,7 @@ ERASE:  dw COLON
         dw IGT
         dw CSTORE
         dw _LOOP
+        db 0xf8
         dw SEMI
 
         db 4,'F','I','L' ; FILL
@@ -508,6 +512,7 @@ FILL:   dw COLON
         dw IGT
         dw CSTORE
         dw _LOOP
+        db 0xf8
         dw DROP
         dw SEMI
 
@@ -525,7 +530,7 @@ FORGET: dw COLON
         db 2
         dw _SUB
         dw FETCH
-        dw CURRENT
+        dw _CURRENT
         dw FETCH
         dw STORE
         dw CHASH
@@ -569,16 +574,16 @@ IMMEDIATE:
         dw SEMI
 
         db 5,'L','E','A' ; LEAVE
-        dw LINK
-LINK = $-6
+        dw IMLINK
+IMLINK = $-6
 LEAVE:  dw COLON
         dw STARHASH,_LEAVE
         dw COMMA
         dw SEMI
 
         db 4,'L','O','O' ; LOOP
-        dw LINK
-LINK = $-6
+        dw IMLINK
+IMLINK = $-6
 LOOP:   dw COLON
         dw STARHASH,_LOOP
         dw ENDCOMMA
@@ -600,7 +605,7 @@ PART:   dw COLON
         dw CHASH
         db 8
         dw _ZERO
-        dw CDO
+        dw _CDO
         dw _DUP
         dw CFETCH
         dw CHASH
@@ -608,11 +613,12 @@ PART:   dw COLON
         dw PERIODR
         dw ONEPLUS
         dw _CLOOP
+        db 0xf3
         dw SEMI
 
         db 4,'T','H','E' ; THEN
-        dw LINK
-LINK = $-6
+        dw IMLINK
+IMLINK = $-6
 THEN:   dw COLON
         dw HERE
         dw OVER
@@ -627,7 +633,7 @@ LINK = $-6
 VARIABLE:
         dw COLON
         dw CONSTANT
-        dw SEMICODE
+        dw SCODE
         push de
         jp (iy)
 

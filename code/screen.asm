@@ -28,7 +28,6 @@ PrintChar_:
     ld de,hl
 
     ld hl,ix
-;    ldi
     ld a,(hl)
     ld (de),a
 

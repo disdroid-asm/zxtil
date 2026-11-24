@@ -389,7 +389,6 @@ STARHASH:
 
 _PLUSLOOP:
         dw $+2
-;_PLUSLOOP:
         push ix
         pop hl
         pop de
@@ -862,7 +861,7 @@ LESSTHAN:
         pop de
         pop hl
         and a
-        sbc de,hl
+        sbc hl,de
         ld de,0
         jp p,LTPUSH
         inc e
@@ -879,8 +878,8 @@ LTHASH: dw $+2
         push de
         push hl
         dec ix
-        ;ld (ix+0),h
-        ld (ix+0),l
+        ld (ix+0),h
+        ;ld (ix+0),l
         jp (iy)
 
         db 2,'<','R',0 ; <R
@@ -914,10 +913,11 @@ EQPUSH: push de
 LINK = $-6
 GREATERTHAN: 
         dw $+2 
+
         pop de
         pop hl
         and a
-        sbc hl,de
+        sbc de,hl
         ld de,0
         jp p,GTPUSH
         inc e
@@ -1030,7 +1030,6 @@ _BINARY:
         dw $+2
         ld a,2
         ld (BASE),a
-        dw $+2
         jp (iy)
 
         db 2,'C','!',0 ; C!
@@ -1110,7 +1109,7 @@ CIGT:   dw $+2
         ld l,(ix+0)
         ld h,0
         bit 7,l
-        jr nz,CINEXT
+        jr z,CINEXT
         dec h
 CINEXT: push hl
         jp (iy)
@@ -1122,7 +1121,7 @@ CJGT:   dw $+2
         ld l,(ix+2)
         ld h,0
         bit 7,l
-        jr nz,CJNEXT
+        jr z,CJNEXT
         dec h
 CJNEXT: push hl
         jp (iy)
@@ -1144,7 +1143,7 @@ CKGT:   dw $+2
         ld l,(ix+4)
         ld h,0
         bit 7,l
-        jr nz,CKNEXT
+        jr z,CKNEXT
         dec h
 CKNEXT: push hl
         jp (iy)
@@ -1156,7 +1155,7 @@ _CLEAR: dw $+2
         call _CLEARSCRN
         jp (iy)
 
-        db 5,'C','O','M' ; COMPILER
+        db 8,'C','O','M' ; COMPILER
         dw LINK
 LINK = $-6
 _COMPILER:   
@@ -1375,7 +1374,7 @@ HERE:   dw $+2
         dw LINK
 LINK = $-6
 _HEX:   dw $+2
-        ld a,0x0a
+        ld a,0x10
         ld (BASE),a
         jp (iy)
 
@@ -1412,7 +1411,7 @@ JGT:    dw $+2
         push hl
         jp (iy)
 
-        db 2,'K','>',0 ; I>
+        db 2,'K','>',0 ; K>
         dw LINK
 LINK = $-6
 KGT:    dw $+2
@@ -1494,7 +1493,7 @@ _MOD:   dw $+2
         pop de
         pop bc
         call ISIGN
-        call _US
+        call UDSLASH
         push bc
         exx
         jp (iy)
@@ -1514,7 +1513,7 @@ MODUDIV:
         pop de
         pop bc
         call ISIGN
-        call _US
+        call UDSLASH
         call OSIGN
         push bc
         push hl
@@ -1713,6 +1712,11 @@ _XOR:   dw $+2
         push hl
         jp (iy)
 
+        db 3,'N','O','P'
+        dw LINK
+LINK = $-6
+_NOP:   dw $+2
+        jp (iy)
 
 
 LBLEN equ 128
